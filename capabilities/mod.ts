@@ -15,5 +15,4 @@
  * ```
  */
 
-// Placeholder — implementation modules will be added in subsequent tasks.
-export const _capabilitiesModPlaceholder = {};
+export { registerAllCapabilities } from "./index.ts";
