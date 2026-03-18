@@ -72,6 +72,23 @@ export interface GitHubPlatformState {
    * entries; oldest entries are evicted first.
    */
   seenEventIds: string[];
+  /**
+   * Human-readable description of the last polling error, if any.
+   *
+   * Set by the poller when a transient error (`server_error` or `network`)
+   * occurs on any repo in this platform during a poll cycle. Cleared on the
+   * next fully successful cycle. Used by the dashboard to show an amber
+   * connection-status indicator.
+   */
+  lastError?: string;
+  /**
+   * Whether polling for this platform has been permanently halted due to an
+   * authentication failure (HTTP 401).
+   *
+   * When `true`, the poller will not make further API calls until the token
+   * is refreshed via the setup wizard. The dashboard shows a red indicator.
+   */
+  authFailed?: boolean;
 }
 
 /**
@@ -107,6 +124,23 @@ export interface GitLabPlatformState {
    * entries; oldest entries are evicted first.
    */
   seenEventIds: string[];
+  /**
+   * Human-readable description of the last polling error, if any.
+   *
+   * Set by the poller when a transient error (`server_error` or `network`)
+   * occurs on any repo in this platform during a poll cycle. Cleared on the
+   * next fully successful cycle. Used by the dashboard to show an amber
+   * connection-status indicator.
+   */
+  lastError?: string;
+  /**
+   * Whether polling for this platform has been permanently halted due to an
+   * authentication failure (HTTP 401).
+   *
+   * When `true`, the poller will not make further API calls until the token
+   * is refreshed via the setup wizard. The dashboard shows a red indicator.
+   */
+  authFailed?: boolean;
 }
 
 /**

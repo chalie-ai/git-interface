@@ -14,3 +14,5 @@
  */
 
 export { handleSetupAction, renderSetupWizard } from "./setup-wizard.ts";
+export { renderDashboard, renderEmptyState } from "./dashboard.ts";
+export type { DashboardEvent, DashboardEventKind } from "./dashboard.ts";
