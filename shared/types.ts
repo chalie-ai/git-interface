@@ -374,13 +374,16 @@ export type ApiErrorCode =
   | "network";
 
 /**
- * Typed API error thrown by GitHub and GitLab client functions.
+ * Payload shape carried by every {@link ApiError} instance.
  *
- * Consumers should switch on `code` to decide how to handle each
- * category (e.g. surface `auth_failed` as a "reconnect" prompt,
+ * This interface defines the structured data attached to a thrown
+ * `ApiError`. Consumers should switch on `code` to decide how to handle
+ * each category (e.g. surface `auth_failed` as a "reconnect" prompt,
  * back off on `rate_limited` using `retryAfter`).
+ *
+ * @see ApiError
  */
-export interface ApiError {
+export interface ApiErrorPayload {
   /** Platform that produced the error. */
   platform: Platform;
   /** HTTP status code, or 0 for network-level failures. */
@@ -395,4 +398,67 @@ export interface ApiError {
    * or `RateLimit-Reset` header.
    */
   retryAfter?: number;
+}
+
+/**
+ * Throwable API error class used by GitHub and GitLab client functions.
+ *
+ * `ApiError` serves a dual role in TypeScript:
+ * - **Payload shape** — the class's structural type acts as an interface,
+ *   so `ApiError` can be used as a type annotation wherever the payload
+ *   shape is needed.
+ * - **Throwable class** — extends the built-in `Error` so instances can be
+ *   thrown, caught, and checked with `instanceof ApiError`.
+ *
+ * @example
+ * ```ts
+ * throw new ApiError({
+ *   platform: "github",
+ *   status: 401,
+ *   code: "auth_failed",
+ *   message: "GitHub token is invalid or expired. Please reconnect in settings.",
+ * });
+ * ```
+ *
+ * @example
+ * ```ts
+ * try {
+ *   await listRepos(token);
+ * } catch (err) {
+ *   if (err instanceof ApiError && err.code === "rate_limited") {
+ *     await delay((err.retryAfter ?? 60) * 1_000);
+ *   }
+ * }
+ * ```
+ */
+export class ApiError extends Error implements ApiErrorPayload {
+  /** Platform that produced the error. */
+  readonly platform: Platform;
+
+  /** HTTP status code, or 0 for network-level failures. */
+  readonly status: number;
+
+  /** Discriminated error category. */
+  readonly code: ApiErrorCode;
+
+  /**
+   * Number of seconds to wait before retrying, populated when
+   * `code === "rate_limited"` and the server provided a `Retry-After`
+   * or `RateLimit-Reset` header.
+   */
+  readonly retryAfter?: number;
+
+  /**
+   * Construct a new `ApiError` from a typed payload object.
+   *
+   * @param payload - Structured error data conforming to {@link ApiErrorPayload}.
+   */
+  constructor(payload: ApiErrorPayload) {
+    super(payload.message);
+    this.name = "ApiError";
+    this.platform = payload.platform;
+    this.status = payload.status;
+    this.code = payload.code;
+    this.retryAfter = payload.retryAfter;
+  }
 }
