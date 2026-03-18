@@ -14,5 +14,16 @@
  * ```
  */
 
-// Placeholder — implementation modules will be added in subsequent tasks.
-export const _monitorModPlaceholder = {};
+export {
+  addSeenEventId,
+  getState,
+  isEventSeen,
+  loadState,
+  saveState,
+} from "./store.ts";
+export type {
+  GitHubPlatformState,
+  GitLabPlatformState,
+  MonitorSettings,
+  MonitorState,
+} from "./store.ts";
