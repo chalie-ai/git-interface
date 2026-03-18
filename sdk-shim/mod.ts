@@ -17,12 +17,57 @@
  * - Tool writes one base64-encoded JSON response object to stdout.
  * Response shape: `{ text?: string; html?: string; title?: string; error?: string }`.
  *
+ * ## Module structure
+ *
+ * | Module | Role |
+ * |--------|------|
+ * | `types.ts` | Shared wire-protocol and capability type definitions. |
+ * | `ipc.ts` | Low-level base64-JSON encode/decode and stdin/stdout helpers. |
+ * | `index.ts` | High-level façade: `registerCapability`, `dispatch`, `secrets`. |
+ * | `registry.ts` | Internal capability map and IPC event loop. |
+ * | `secrets.ts` | Secure token storage (Chalie socket → encrypted file). |
+ *
  * @example
  * ```ts
  * import { sendMessage, sendSignal, dataDir } from "@chalie/interface-sdk";
  * ```
  */
-export * from "./ipc.ts";
-export * from "./secrets.ts";
-export * from "./registry.ts";
+
+// ---------------------------------------------------------------------------
+// Shared types
+// ---------------------------------------------------------------------------
 export * from "./types.ts";
+
+// ---------------------------------------------------------------------------
+// Low-level IPC helpers
+// (`readRequest`, `writeResponse`, `encodeResponse`, `decodeMessage`,
+//  `sendError` — note: `sendMessage`, `sendSignal`, and `dataDir` are
+//  exported via `index.ts` below to keep a single canonical source)
+// ---------------------------------------------------------------------------
+export {
+  decodeMessage,
+  encodeResponse,
+  readRequest,
+  sendError,
+  writeResponse,
+} from "./ipc.ts";
+
+// ---------------------------------------------------------------------------
+// High-level API façade
+// (`sendMessage`, `sendSignal`, `dataDir`, `registerCapability`,
+//  `dispatch`, `secrets`)
+// ---------------------------------------------------------------------------
+export * from "./index.ts";
+
+// ---------------------------------------------------------------------------
+// Registry internals
+// (event loop and capability introspection not covered by the façade)
+// ---------------------------------------------------------------------------
+export { listRegisteredCapabilities, runEventLoop } from "./registry.ts";
+
+// ---------------------------------------------------------------------------
+// Secrets internals
+// (lower-level ref-based API for advanced consumers)
+// ---------------------------------------------------------------------------
+export { deleteSecret, retrieveSecret, storeSecret } from "./secrets.ts";
+export type { SecretRef } from "./secrets.ts";

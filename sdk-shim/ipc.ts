@@ -74,6 +74,52 @@ export function decodeMessage(line: string): InboundMessage {
 // ---------------------------------------------------------------------------
 
 /**
+ * Reads and decodes one base64-encoded JSON line from stdin.
+ *
+ * Accumulates bytes from stdin until a newline character is found, then
+ * decodes the complete line as a base64 JSON object. This function blocks
+ * until a full line is available.
+ *
+ * @returns A promise that resolves to the decoded {@link InboundMessage}.
+ * @throws {Error} If stdin reaches EOF before a complete line is received.
+ * @throws {SyntaxError} If the decoded bytes are not valid JSON.
+ *
+ * @example
+ * ```ts
+ * const msg = await readRequest();
+ * console.log(msg.capability); // e.g. "pr_list"
+ * ```
+ */
+export async function readRequest(): Promise<InboundMessage> {
+  const decoder = new TextDecoder();
+  const buf = new Uint8Array(4096);
+  let pending = "";
+
+  while (true) {
+    let bytesRead: number | null;
+    try {
+      bytesRead = await Deno.stdin.read(buf);
+    } catch (err) {
+      throw new Error(
+        `Failed to read from stdin: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+
+    if (bytesRead === null) {
+      throw new Error("stdin closed (EOF) before a complete message was received.");
+    }
+
+    pending += decoder.decode(buf.subarray(0, bytesRead));
+
+    const newlineIdx = pending.indexOf("\n");
+    if (newlineIdx !== -1) {
+      const line = pending.slice(0, newlineIdx);
+      return decodeMessage(line);
+    }
+  }
+}
+
+/**
  * Writes a structured response to stdout using the Chalie IPC protocol.
  *
  * Prefer `sendMessage` or `sendSignal` over calling this directly.
