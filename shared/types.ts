@@ -459,6 +459,6 @@ export class ApiError extends Error implements ApiErrorPayload {
     this.platform = payload.platform;
     this.status = payload.status;
     this.code = payload.code;
-    this.retryAfter = payload.retryAfter;
+    if (payload.retryAfter !== undefined) this.retryAfter = payload.retryAfter;
   }
 }

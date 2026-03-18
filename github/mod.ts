@@ -9,9 +9,25 @@
  *
  * @example
  * ```ts
- * import { listRepos, listPullRequests } from "~/github/mod.ts";
+ * import { listRepos, listPRs, getPR } from "~/github/mod.ts";
  * ```
  */
 
-// Placeholder — implementation modules will be added in subsequent tasks.
-export const _githubModPlaceholder = {};
+export {
+  createIssue,
+  createPR,
+  createReview,
+  getRepo,
+  getPR,
+  listBranches,
+  listIssues,
+  listPRs,
+  listRepos,
+  listReviews,
+  listSecurityAlerts,
+  listWorkflowRuns,
+  mergePR,
+  searchCode,
+  triggerWorkflow,
+  updateIssue,
+} from "./client.ts";
