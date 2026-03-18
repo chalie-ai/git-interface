@@ -17,9 +17,9 @@ import type { InboundMessage, OutboundResponse, Signal, SignalEnergy } from "./t
  *
  * Resolution order:
  * 1. `CHALIE_DATA_DIR` environment variable (set by the Chalie runtime).
- * 2. `XDG_DATA_HOME/chalie/git-interface` on Linux/macOS.
- * 3. `%APPDATA%/chalie/git-interface` on Windows.
- * 4. `~/.local/share/chalie/git-interface` fallback.
+ * 2. `XDG_DATA_HOME/chalie/git-interface` on Linux/macOS when XDG is set.
+ * 3. `%APPDATA%/chalie/git-interface` on Windows when APPDATA is set.
+ * 4. `~/.chalie/git-interface` final fallback (matches Chalie spec default).
  */
 export function dataDir(): string {
   const envDir = Deno.env.get("CHALIE_DATA_DIR");
@@ -32,7 +32,7 @@ export function dataDir(): string {
   if (appData) return `${appData}/chalie/git-interface`;
 
   const home = Deno.env.get("HOME") ?? ".";
-  return `${home}/.local/share/chalie/git-interface`;
+  return `${home}/.chalie/git-interface`;
 }
 
 // ---------------------------------------------------------------------------
@@ -137,11 +137,17 @@ export function writeResponse(response: OutboundResponse): void {
  *
  * @param text - Human-readable message text.
  * @param topic - Optional topic tag for routing (e.g. `"review_request"`).
+ *
+ * @remarks
+ * Uses a conditional spread to set `title` only when `topic` is defined.
+ * This satisfies the `exactOptionalPropertyTypes` compiler option: the
+ * `OutboundResponse.title` property must be `string` when present and
+ * absent (not `undefined`) when omitted.
  */
 export function sendMessage(text: string, topic?: string): void {
   writeResponse({
     text: topic ? `[${topic}] ${text}` : text,
-    title: topic,
+    ...(topic !== undefined ? { title: topic } : {}),
   });
 }
 

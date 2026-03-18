@@ -152,12 +152,18 @@ async function readSecretsFile(): Promise<Record<string, string>> {
 }
 
 /**
- * Writes the secrets record to disk.
+ * Writes the secrets record to disk with mode `0o600` (owner-read/write only).
+ *
+ * The directory is created if it does not already exist. The file is
+ * written with `mode: 0o600` so it is readable and writable only by the
+ * process owner — satisfying the "600-permission file" requirement in the
+ * Chalie spec. On platforms that ignore POSIX modes (e.g. Windows) this
+ * is silently ignored by the OS.
  *
  * @param store - The updated secrets record to persist.
  */
 async function writeSecretsFile(store: Record<string, string>): Promise<void> {
   const dir = dataDir();
   await Deno.mkdir(dir, { recursive: true });
-  await Deno.writeTextFile(secretsFilePath(), JSON.stringify(store, null, 2));
+  await Deno.writeTextFile(secretsFilePath(), JSON.stringify(store, null, 2), { mode: 0o600 });
 }
