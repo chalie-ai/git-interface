@@ -13,5 +13,4 @@
  * ```
  */
 
-// Placeholder — implementation modules will be added in subsequent tasks.
-export const _uiModPlaceholder = {};
+export { handleSetupAction, renderSetupWizard } from "./setup-wizard.ts";
