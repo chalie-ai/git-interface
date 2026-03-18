@@ -1,0 +1,17 @@
+/**
+ * @module ui
+ *
+ * Barrel re-export for UI rendering helpers.
+ *
+ * Provides functions that generate HTML fragments conforming to the
+ * Radiant design system for use in Chalie's capability result panels.
+ * Also includes the setup wizard and main dashboard components.
+ *
+ * @example
+ * ```ts
+ * import { renderDashboard, renderSetupWizard } from "~/ui/mod.ts";
+ * ```
+ */
+
+// Placeholder — implementation modules will be added in subsequent tasks.
+export const _uiModPlaceholder = {};
