@@ -675,7 +675,9 @@ function normalizeProject(raw: RawGLProject, openPRCount = 0): Repo {
     openIssueCount: raw.open_issues_count,
     openPRCount,
   };
-  if (raw.predominant_language != null) repo.language = raw.predominant_language;
+  if (raw.predominant_language !== null && raw.predominant_language !== undefined) {
+    repo.language = raw.predominant_language;
+  }
   if (raw.description !== null && raw.description !== "") {
     repo.description = raw.description;
   }
@@ -692,11 +694,14 @@ function normalizeProject(raw: RawGLProject, openPRCount = 0): Repo {
  * by the single-MR endpoint (`getMR`); the list endpoint returns `null`/`0`
  * for these fields.
  *
+ * Exported for unit testing of type-normalisation logic. Production callers
+ * should prefer the high-level `listMRs` / `getMR` functions.
+ *
  * @param raw - Raw JSON object from the GitLab merge requests API.
  * @param repoFullName - `owner/repo` path of the containing project.
  * @returns Normalised `PullRequest` value.
  */
-function normalizeMR(raw: RawGLMR, repoFullName: string): PullRequest {
+export function normalizeMR(raw: RawGLMR, repoFullName: string): PullRequest {
   const isDraft: boolean = raw.draft || raw.work_in_progress;
   const state: PRState = mapMRState(raw.state);
 
@@ -760,11 +765,17 @@ function normalizeIssue(raw: RawGLIssue, repoFullName: string): Issue {
 /**
  * Normalises a raw GitLab pipeline object to a unified `Pipeline`.
  *
+ * Accepts both the standard pipeline shape and the trigger-pipeline response
+ * shape, which omits the optional `name` field.
+ *
+ * Exported for unit testing of type-normalisation logic. Production callers
+ * should prefer the high-level `listPipelines` / `triggerPipeline` functions.
+ *
  * @param raw - Raw JSON object from the GitLab pipelines API.
  * @param repoFullName - `owner/repo` path of the containing project.
  * @returns Normalised `Pipeline` value.
  */
-function normalizePipeline(
+export function normalizePipeline(
   raw: RawGLPipeline | RawGLTriggerPipelineResponse,
   repoFullName: string,
 ): Pipeline {
@@ -772,7 +783,9 @@ function normalizePipeline(
     id: String(raw.id),
     platform: "gitlab",
     repo: repoFullName,
-    name: ("name" in raw && raw.name != null) ? raw.name : `Pipeline #${raw.id}`,
+    name: ("name" in raw && raw.name !== null && raw.name !== undefined)
+      ? raw.name
+      : `Pipeline #${raw.id}`,
     status: mapPipelineStatus(raw.status),
     branch: raw.ref,
     commitSha: raw.sha,

@@ -653,13 +653,16 @@ function mapWorkflowRunStatus(
  * from a list endpoint response (which omits these fields). Use `getPR` to
  * obtain accurate values for a single PR.
  *
+ * Exported for unit testing of type-normalisation logic. Production callers
+ * should prefer the high-level `listPRs` / `getPR` functions.
+ *
  * @param raw - Raw JSON object from the GitHub pulls API.
  * @param repoFullName - `"owner/repo"` path of the containing repository.
  * @param reviewDecision - Pre-computed review decision (optional).
  * @param ciStatus - Pre-fetched CI status for the PR head (optional).
  * @returns Normalised `PullRequest` value.
  */
-function normalizePR(
+export function normalizePR(
   raw: RawGHPR,
   repoFullName: string,
   reviewDecision?: ReviewDecision,
@@ -707,11 +710,15 @@ function normalizePR(
  * Callers must ensure the raw object does not have a `pull_request` key
  * (which would indicate a PR masquerading as an issue on this endpoint).
  *
+ * Exported for unit testing of type-normalisation logic. Production callers
+ * should prefer the high-level `listIssues` function, which performs the
+ * `pull_request` key filter automatically before calling this helper.
+ *
  * @param raw - Raw JSON object from the GitHub issues API, without `pull_request`.
  * @param repoFullName - `"owner/repo"` path of the containing repository.
  * @returns Normalised `Issue` value.
  */
-function normalizeIssue(raw: RawGHIssue, repoFullName: string): Issue {
+export function normalizeIssue(raw: RawGHIssue, repoFullName: string): Issue {
   const issue: Issue = {
     id: String(raw.id),
     platform: "github",
@@ -751,11 +758,14 @@ function normalizeBranch(raw: RawGHBranch): Branch {
  * Duration is computed from `run_started_at` and `updated_at` when the run
  * has completed. The `name` field falls back to `"Workflow Run"` when null.
  *
+ * Exported for unit testing of type-normalisation logic. Production callers
+ * should prefer the high-level `listWorkflowRuns` function.
+ *
  * @param raw - Raw JSON object from the GitHub workflow-runs API.
  * @param repoFullName - `"owner/repo"` path of the containing repository.
  * @returns Normalised `Pipeline` value.
  */
-function normalizePipeline(raw: RawGHWorkflowRun, repoFullName: string): Pipeline {
+export function normalizePipeline(raw: RawGHWorkflowRun, repoFullName: string): Pipeline {
   const status = mapWorkflowRunStatus(raw.status, raw.conclusion);
 
   const pipeline: Pipeline = {
