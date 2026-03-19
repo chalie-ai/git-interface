@@ -259,6 +259,24 @@ function tempStatePath(): string {
  * are merged on top of the defaults so that newly-added settings keys are
  * always present even when reading an older state file.
  *
+ * ### Null-coercion for platform state fields
+ *
+ * Three fields on each platform state object are sanitised during
+ * deserialisation to guard against `null` values that can appear in
+ * `monitor.json` due to a corrupted write, a manual edit, or a state file
+ * produced by an older version of the tool that used `null` as an initial
+ * value:
+ *
+ * - `lastPollAt` — coerced from `null`/`undefined` to `""` (the empty-string
+ *   sentinel meaning "first run"). `effectiveLastPollAt()` in `poller.ts`
+ *   checks `lastPollAt.length > 0`; without this guard that call would throw
+ *   `TypeError: Cannot read properties of null (reading 'length')`.
+ * - `seenEventIds` — coerced from `null`/`undefined` to `[]`. Callers call
+ *   `.push()` and `.includes()` on this array; `null` would cause a
+ *   `TypeError` at runtime.
+ * - `monitoredRepos` — coerced from `null`/`undefined` to `[]`. Callers
+ *   iterate over this array; `null` would cause a `TypeError` at runtime.
+ *
  * @returns A promise that resolves to the current {@link MonitorState}.
  *
  * @example
@@ -280,8 +298,31 @@ export async function loadState(): Promise<MonitorState> {
   }
 
   const state: MonitorState = {
-    ...(parsed.github !== undefined ? { github: parsed.github } : {}),
-    ...(parsed.gitlab !== undefined ? { gitlab: parsed.gitlab } : {}),
+    ...(parsed.github !== undefined
+      ? {
+          github: {
+            ...parsed.github,
+            // "" sentinel = "first run". effectiveLastPollAt() in poller.ts
+            // calls lastPollAt.length > 0; null would throw TypeError.
+            lastPollAt: parsed.github.lastPollAt ?? "",
+            // Coerce array fields: .push()/.includes() on null throws TypeError.
+            seenEventIds: parsed.github.seenEventIds ?? [],
+            monitoredRepos: parsed.github.monitoredRepos ?? [],
+          },
+        }
+      : {}),
+    ...(parsed.gitlab !== undefined
+      ? {
+          gitlab: {
+            ...parsed.gitlab,
+            // "" sentinel = "first run". Same guard as github.lastPollAt above.
+            lastPollAt: parsed.gitlab.lastPollAt ?? "",
+            // Coerce array fields: .push()/.includes() on null throws TypeError.
+            seenEventIds: parsed.gitlab.seenEventIds ?? [],
+            monitoredRepos: parsed.gitlab.monitoredRepos ?? [],
+          },
+        }
+      : {}),
     settings: {
       ...defaultSettings(),
       ...(parsed.settings ?? {}),
