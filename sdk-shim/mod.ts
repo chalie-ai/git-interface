@@ -24,7 +24,7 @@
  * | `types.ts` | Shared wire-protocol and capability type definitions. |
  * | `ipc.ts` | Low-level base64-JSON encode/decode and stdin/stdout helpers. |
  * | `index.ts` | High-level façade: `registerCapability`, `dispatch`, `secrets`. |
- * | `registry.ts` | Internal capability map and IPC event loop. |
+ * | `registry.ts` | Internal capability map; `runEventLoop` is kept for future SDK parity but is NOT part of the public API (unexported from this module). |
  * | `secrets.ts` | Secure token storage (Chalie socket → encrypted file). |
  *
  * @example
@@ -61,9 +61,13 @@ export * from "./index.ts";
 
 // ---------------------------------------------------------------------------
 // Registry internals
-// (event loop and capability introspection not covered by the façade)
+// (capability introspection not covered by the façade)
+// Note: `runEventLoop` is intentionally NOT re-exported here. `main.ts`
+// implements its own custom IPC loop using `readRequest`/`writeResponse`
+// directly for finer startup/shutdown control. `runEventLoop` remains in
+// `registry.ts` only for API-parity with the future real SDK.
 // ---------------------------------------------------------------------------
-export { listRegisteredCapabilities, runEventLoop } from "./registry.ts";
+export { listRegisteredCapabilities } from "./registry.ts";
 
 // ---------------------------------------------------------------------------
 // Secrets internals
