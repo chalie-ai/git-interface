@@ -14,13 +14,7 @@
  * ```
  */
 
-export {
-  addSeenEventId,
-  getState,
-  isEventSeen,
-  loadState,
-  saveState,
-} from "./store.ts";
+export { addSeenEventId, getState, isEventSeen, loadState, saveState } from "./store.ts";
 export type {
   GitHubPlatformState,
   GitLabPlatformState,

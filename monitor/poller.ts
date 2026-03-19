@@ -116,9 +116,7 @@ const _repoLastErrors = new Map<string, string>();
  * @returns ISO 8601 timestamp to use as the polling lower bound.
  */
 function effectiveLastPollAt(lastPollAt: string): string {
-  return lastPollAt.length > 0
-    ? lastPollAt
-    : new Date(Date.now() - 86_400_000).toISOString();
+  return lastPollAt.length > 0 ? lastPollAt : new Date(Date.now() - 86_400_000).toISOString();
 }
 
 /**
@@ -300,8 +298,14 @@ function eventsFromGitHubPR(
   if (pr.body !== undefined && containsMention(pr.body, username)) {
     if (claimEvent("github", `gh:mention:pr:${pr.id}`)) {
       events.push(
-        makeMentionEvent("github", pr.repo, pr.number, pr.author, pr.url,
-          mentionExcerpt(pr.body, username)),
+        makeMentionEvent(
+          "github",
+          pr.repo,
+          pr.number,
+          pr.author,
+          pr.url,
+          mentionExcerpt(pr.body, username),
+        ),
       );
     }
   }
@@ -336,8 +340,14 @@ function eventsFromGitHubIssue(
   if (issue.body !== undefined && containsMention(issue.body, username)) {
     if (claimEvent("github", `gh:mention:issue:${issue.id}`)) {
       events.push(
-        makeMentionEvent("github", issue.repo, issue.number, issue.author, issue.url,
-          mentionExcerpt(issue.body, username)),
+        makeMentionEvent(
+          "github",
+          issue.repo,
+          issue.number,
+          issue.author,
+          issue.url,
+          mentionExcerpt(issue.body, username),
+        ),
       );
     }
   }
@@ -429,8 +439,14 @@ function eventsFromGitLabMR(
   if (mr.body !== undefined && containsMention(mr.body, username)) {
     if (claimEvent("gitlab", `gl:mention:mr:${mr.id}`)) {
       events.push(
-        makeMentionEvent("gitlab", mr.repo, mr.number, mr.author, mr.url,
-          mentionExcerpt(mr.body, username)),
+        makeMentionEvent(
+          "gitlab",
+          mr.repo,
+          mr.number,
+          mr.author,
+          mr.url,
+          mentionExcerpt(mr.body, username),
+        ),
       );
     }
   }
@@ -465,8 +481,14 @@ function eventsFromGitLabIssue(
   if (issue.body !== undefined && containsMention(issue.body, username)) {
     if (claimEvent("gitlab", `gl:mention:issue:${issue.id}`)) {
       events.push(
-        makeMentionEvent("gitlab", issue.repo, issue.number, issue.author, issue.url,
-          mentionExcerpt(issue.body, username)),
+        makeMentionEvent(
+          "gitlab",
+          issue.repo,
+          issue.number,
+          issue.author,
+          issue.url,
+          mentionExcerpt(issue.body, username),
+        ),
       );
     }
   }
@@ -860,22 +882,38 @@ async function runPollCycle(state: MonitorState): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * Starts the background polling loop, scheduling recurring poll cycles at the
- * interval defined in `state.settings.pollIntervalMinutes`.
+ * Starts the background polling loop, firing an immediate first poll on
+ * startup and then scheduling recurring poll cycles at the interval defined
+ * in `state.settings.pollIntervalMinutes`.
+ *
+ * ## Startup behaviour
+ *
+ * A poll cycle is invoked **immediately** (synchronously dispatched, runs
+ * asynchronously) so that users see notifications as soon as the daemon
+ * starts rather than having to wait a full `pollIntervalMinutes` interval.
+ * Subsequent cycles are then scheduled via `setInterval` to repeat every
+ * `pollIntervalMinutes` minutes.
+ *
+ * ## Interval computation
  *
  * The poll interval is computed once from the initial `state` snapshot. If
  * `pollIntervalMinutes` changes after `startPoller` is called, the process
  * must be restarted to apply the new interval.
  *
- * Within each tick, the current state is read fresh from the module-level
- * store cache via {@link getState} to pick up any mutations made by
- * capability handlers between ticks (e.g. adding a newly monitored repo).
+ * ## State freshness
  *
- * The function returns synchronously after registering the interval. The poll
- * loop runs indefinitely until the Deno process exits.
+ * Within each tick (both the immediate call and each interval tick), the
+ * current state is read fresh from the module-level store cache via
+ * {@link getState} to pick up any mutations made by capability handlers
+ * between ticks (e.g. adding a newly monitored repo).
+ *
+ * The function returns synchronously after dispatching the immediate poll
+ * and registering the interval. The poll loop runs indefinitely until the
+ * Deno process exits.
  *
  * @param state - Initial monitor state. Used only to determine the poll
- *   interval; all subsequent ticks use {@link getState}.
+ *   interval; all poll cycles (including the immediate one) use
+ *   {@link getState} to obtain the latest state snapshot.
  *
  * @example
  * ```ts
@@ -883,11 +921,20 @@ async function runPollCycle(state: MonitorState): Promise<void> {
  * import { startPoller } from "~/monitor/poller.ts";
  *
  * const state = await loadState();
- * startPoller(state);
+ * startPoller(state); // polls immediately, then every pollIntervalMinutes minutes
  * ```
  */
 export function startPoller(state: MonitorState): void {
   const intervalMs = state.settings.pollIntervalMinutes * 60_000;
+
+  // Fire an immediate first poll so users receive notifications on startup
+  // rather than waiting for the first interval tick.
+  runPollCycle(getState()).catch((err: unknown) => {
+    console.error(
+      "[monitor/poller] Unexpected error in poll cycle:",
+      err instanceof Error ? err.message : String(err),
+    );
+  });
 
   setInterval(() => {
     const currentState = getState();

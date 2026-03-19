@@ -112,10 +112,10 @@ function decodeWrite(raw: string): OutboundResponse {
  * Each call to `sendMessage` or `sendSignal` produces exactly one write to
  * `Deno.stdout`, so `responses.length` equals the number of IPC sends.
  *
- * @param fn - Async function whose IPC writes should be intercepted.
+ * @param fn - Synchronous or async function whose IPC writes should be intercepted.
  * @returns Decoded {@link OutboundResponse} objects, one per IPC send.
  */
-async function captureIPCWrites(fn: () => Promise<void>): Promise<OutboundResponse[]> {
+async function captureIPCWrites(fn: () => void | Promise<void>): Promise<OutboundResponse[]> {
   const rawWrites: string[] = [];
 
   const ws = stub(
@@ -363,9 +363,7 @@ Deno.test(
     };
     const state = makeDefaultState({ notifyOnCIFailure: false });
 
-    const responses = await captureIPCWrites(() =>
-      classifyAndNotify({ events: [event] }, state)
-    );
+    const responses = await captureIPCWrites(() => classifyAndNotify({ events: [event] }, state));
 
     assertEquals(
       responses.length,
@@ -419,9 +417,7 @@ Deno.test(
     };
     const state = makeDefaultState({ notifyOnReviewRequest: false });
 
-    const responses = await captureIPCWrites(() =>
-      classifyAndNotify({ events: [event] }, state)
-    );
+    const responses = await captureIPCWrites(() => classifyAndNotify({ events: [event] }, state));
 
     assertEquals(
       responses.length,

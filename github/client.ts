@@ -912,8 +912,7 @@ export async function listRepos(
   token: string,
   maxPages = DEFAULT_MAX_PAGES,
 ): Promise<Repo[]> {
-  const url =
-    `${BASE_URL}/user/repos` +
+  const url = `${BASE_URL}/user/repos` +
     `?affiliation=owner%2Ccollaborator%2Corganization_member&sort=updated&per_page=100`;
   const raws = await paginate<RawGHRepo>(token, url, maxPages);
   return raws.map((r) => normalizeRepo(r));
@@ -966,8 +965,7 @@ export async function listPRs(
   const state = options?.state ?? "open";
   const maxPages = options?.maxPages ?? DEFAULT_MAX_PAGES;
   const repoFullName = `${owner}/${repo}`;
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls` +
     `?state=${state}&sort=updated&direction=desc&per_page=100`;
   const raws = await paginate<RawGHPR>(token, url, maxPages);
   return raws.map((r) => normalizePR(r, repoFullName));
@@ -1077,8 +1075,7 @@ export async function mergePR(
   prNumber: number,
   options?: { mergeMethod?: "merge" | "squash" | "rebase" },
 ): Promise<void> {
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
     `/pulls/${prNumber}/merge`;
   const requestBody: Record<string, unknown> = {
     merge_method: options?.mergeMethod ?? "merge",
@@ -1111,8 +1108,7 @@ export async function listReviews(
   maxPages = DEFAULT_MAX_PAGES,
 ): Promise<Review[]> {
   const repoFullName = `${owner}/${repo}`;
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
     `/pulls/${prNumber}/reviews?per_page=100`;
   const raws = await paginate<RawGHReview>(token, url, maxPages);
   return raws.map((r) => normalizeReview(r, repoFullName, prNumber));
@@ -1151,8 +1147,7 @@ export async function createReview(
   };
   if (params.body !== undefined) requestBody["body"] = params.body;
 
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
     `/pulls/${prNumber}/reviews`;
   const [raw] = await request<RawGHReview>(token, url, {
     method: "POST",
@@ -1198,8 +1193,7 @@ export async function listIssues(
   if (options?.filter !== undefined) params.set("filter", options.filter);
   if (options?.since !== undefined) params.set("since", options.since);
 
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues` +
     `?${params.toString()}`;
   const raws = await paginate<RawGHIssue>(token, url, maxPages);
 
@@ -1236,8 +1230,7 @@ export async function createIssue(
   if (params.labels !== undefined) requestBody["labels"] = params.labels;
   if (params.assignees !== undefined) requestBody["assignees"] = params.assignees;
 
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues`;
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues`;
   const [raw] = await request<RawGHIssue>(token, url, {
     method: "POST",
     body: JSON.stringify(requestBody),
@@ -1280,8 +1273,7 @@ export async function updateIssue(
   if (params.labels !== undefined) requestBody["labels"] = params.labels;
   if (params.assignees !== undefined) requestBody["assignees"] = params.assignees;
 
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
     `/issues/${issueNumber}`;
   const [raw] = await request<RawGHIssue>(token, url, {
     method: "PATCH",
@@ -1308,8 +1300,7 @@ export async function listBranches(
   repo: string,
   maxPages = DEFAULT_MAX_PAGES,
 ): Promise<Branch[]> {
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
     `/branches?per_page=100`;
   const raws = await paginate<RawGHBranch>(token, url, maxPages);
   return raws.map(normalizeBranch);
@@ -1391,8 +1382,7 @@ export async function triggerWorkflow(
   const requestBody: Record<string, unknown> = { ref };
   if (inputs !== undefined) requestBody["inputs"] = inputs;
 
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
     `/actions/workflows/${encodeURIComponent(workflowId)}/dispatches`;
   await request<Record<never, never>>(token, url, {
     method: "POST",
@@ -1428,8 +1418,7 @@ export async function listSecurityAlerts(
   const repoFullName = `${owner}/${repo}`;
   const state = options?.state ?? "open";
   const maxPages = options?.maxPages ?? DEFAULT_MAX_PAGES;
-  const url =
-    `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
+  const url = `${BASE_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
     `/dependabot/alerts?state=${state}&per_page=100`;
   const raws = await paginate<RawGHDependabotAlert>(token, url, maxPages);
   return raws.map((r) => normalizeSecurityAlert(r, repoFullName));
@@ -1467,8 +1456,9 @@ export async function searchCode(
   // The search API wraps results in { items: [...] } and uses standard Link
   // headers for pagination.
   const allItems: RawGHCodeSearchItem[] = [];
-  let nextUrl: string | undefined =
-    `${BASE_URL}/search/code?q=${encodeURIComponent(q)}&per_page=100`;
+  let nextUrl: string | undefined = `${BASE_URL}/search/code?q=${
+    encodeURIComponent(q)
+  }&per_page=100`;
   let page = 0;
 
   while (nextUrl !== undefined && page < limit) {

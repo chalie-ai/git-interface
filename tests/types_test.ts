@@ -40,10 +40,7 @@ import {
   normalizePipeline as normalizeGHPipeline,
   normalizePR,
 } from "../github/client.ts";
-import {
-  normalizeMR,
-  normalizePipeline as normalizeGLPipeline,
-} from "../gitlab/client.ts";
+import { normalizeMR, normalizePipeline as normalizeGLPipeline } from "../gitlab/client.ts";
 
 import {
   RAW_GH_ISSUE_IS_PR,
@@ -169,9 +166,7 @@ Deno.test("GitHub issue filtering: items with pull_request key are excluded from
 Deno.test("GitHub issue filtering: item with pull_request key does not appear in normalised list", () => {
   const rawItems = [RAW_GH_ISSUE_IS_PR, RAW_GH_ISSUE_NORMAL];
   const normalised = rawItems
-    .filter((item) =>
-      (item as { pull_request?: unknown }).pull_request === undefined
-    )
+    .filter((item) => (item as { pull_request?: unknown }).pull_request === undefined)
     .map((item) => normalizeIssue(item, "acme/backend"));
 
   assertEquals(normalised.length, 1);

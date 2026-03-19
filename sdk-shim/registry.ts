@@ -72,7 +72,9 @@ export async function dispatch(message: InboundMessage): Promise<CapabilityResul
 
   const entry = _registry.get(name);
   if (!entry) {
-    return { error: `Unknown capability: "${name}". Available: ${[..._registry.keys()].join(", ")}` };
+    return {
+      error: `Unknown capability: "${name}". Available: ${[..._registry.keys()].join(", ")}`,
+    };
   }
 
   const ctx: CapabilityContext = {
@@ -104,6 +106,15 @@ export async function dispatch(message: InboundMessage): Promise<CapabilityResul
  * @param scopes - Optional scopes declaration advertised to the runtime.
  *   Not used by the current shim but accepted for API parity with the
  *   future `@chalie/interface-sdk@1`.
+ *
+ * @deprecated **Do not call this function.** `main.ts` implements its own
+ *   custom IPC event loop using `readRequest`/`writeResponse` directly,
+ *   which provides finer-grained control over startup sequencing and
+ *   shutdown. This function body is retained solely to preserve API parity
+ *   with the future `jsr:@chalie/interface-sdk@1` and is **not exported**
+ *   from `sdk-shim/mod.ts`. When the real SDK ships, both this function
+ *   and the custom loop in `main.ts` will be replaced by the SDK's
+ *   equivalent entrypoint.
  */
 export async function runEventLoop(_scopes?: Scopes): Promise<void> {
   const decoder = new TextDecoder();
@@ -133,7 +144,9 @@ export async function runEventLoop(_scopes?: Scopes): Promise<void> {
       try {
         message = decodeMessage(line);
       } catch (err) {
-        sendError(`Failed to decode inbound message: ${err instanceof Error ? err.message : String(err)}`);
+        sendError(
+          `Failed to decode inbound message: ${err instanceof Error ? err.message : String(err)}`,
+        );
         continue;
       }
 
