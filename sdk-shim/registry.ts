@@ -72,7 +72,9 @@ export async function dispatch(message: InboundMessage): Promise<CapabilityResul
 
   const entry = _registry.get(name);
   if (!entry) {
-    return { error: `Unknown capability: "${name}". Available: ${[..._registry.keys()].join(", ")}` };
+    return {
+      error: `Unknown capability: "${name}". Available: ${[..._registry.keys()].join(", ")}`,
+    };
   }
 
   const ctx: CapabilityContext = {
@@ -142,7 +144,9 @@ export async function runEventLoop(_scopes?: Scopes): Promise<void> {
       try {
         message = decodeMessage(line);
       } catch (err) {
-        sendError(`Failed to decode inbound message: ${err instanceof Error ? err.message : String(err)}`);
+        sendError(
+          `Failed to decode inbound message: ${err instanceof Error ? err.message : String(err)}`,
+        );
         continue;
       }
 

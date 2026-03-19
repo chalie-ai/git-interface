@@ -929,8 +929,7 @@ export async function getMR(
   projectId: string,
   mrIid: number,
 ): Promise<PullRequest> {
-  const url =
-    `${BASE_URL}/projects/${projectId}/merge_requests/${mrIid}?include_diff_stats=true`;
+  const url = `${BASE_URL}/projects/${projectId}/merge_requests/${mrIid}?include_diff_stats=true`;
   const [raw] = await request<RawGLMR>(token, url);
   return normalizeMR(raw, decodeURIComponent(projectId));
 }
@@ -1388,8 +1387,7 @@ export async function searchCode(
     // Construct a web URL pointing to the file (and line if available).
     const decodedId = decodeURIComponent(projectId);
     // The project web_url is not available here; use the path we know.
-    const fileWebUrl =
-      `https://gitlab.com/${decodedId}/-/blob/${r.ref}/${r.path}#L${r.startline}`;
+    const fileWebUrl = `https://gitlab.com/${decodedId}/-/blob/${r.ref}/${r.path}#L${r.startline}`;
 
     return {
       path: r.path,

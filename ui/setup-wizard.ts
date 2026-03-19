@@ -114,7 +114,9 @@ function renderStepProgress(current: number, total = 4): string {
       const isActive = stepNum === current;
       const isComplete = stepNum < current;
       const state = isComplete ? "complete" : isActive ? "active" : "pending";
-      return `<li data-radiant-step-item data-radiant-step-state="${state}" aria-current="${isActive ? "step" : "false"}">
+      return `<li data-radiant-step-item data-radiant-step-state="${state}" aria-current="${
+        isActive ? "step" : "false"
+      }">
         <span data-radiant-step-number>${escHtml(String(stepNum))}</span>
         <span data-radiant-step-label>${escHtml(label)}</span>
       </li>`;
@@ -145,7 +147,9 @@ function wrapWizardCard(inner: string, currentStep: number, platform: Platform):
       </a>`
     : "";
 
-  return `<article data-radiant-wizard data-radiant-platform="${escHtml(platform)}" data-radiant-step="${currentStep}">
+  return `<article data-radiant-wizard data-radiant-platform="${
+    escHtml(platform)
+  }" data-radiant-step="${currentStep}">
   ${renderStepProgress(currentStep)}
   <div data-radiant-wizard-body>
     ${backLink}
@@ -457,7 +461,9 @@ function renderStep3Success(
   const expiryLine = tokenExpiry
     ? `<p data-radiant-body>
           <strong>Token expiry:</strong>
-          <time datetime="${escHtml(tokenExpiry)}">${escHtml(new Date(tokenExpiry).toLocaleDateString())}</time>
+          <time datetime="${escHtml(tokenExpiry)}">${
+      escHtml(new Date(tokenExpiry).toLocaleDateString())
+    }</time>
         </p>`
     : `<p data-radiant-body>
           <strong>Token expiry:</strong>
@@ -565,7 +571,11 @@ function renderStep4WithRepos(
                 ${privateLabel}
                 ${langLabel}
               </span>
-              ${repo.description ? `<small data-radiant-repo-description>${escHtml(repo.description)}</small>` : ""}
+              ${
+        repo.description
+          ? `<small data-radiant-repo-description>${escHtml(repo.description)}</small>`
+          : ""
+      }
             </span>
           </label>
         </li>`;
@@ -627,7 +637,9 @@ function renderStep4WithRepos(
  */
 function renderComplete(platform: Platform, repoCount: number): string {
   const platformLabel = platform === "github" ? "GitHub" : "GitLab";
-  return `<article data-radiant-wizard data-radiant-platform="${escHtml(platform)}" data-radiant-step="complete">
+  return `<article data-radiant-wizard data-radiant-platform="${
+    escHtml(platform)
+  }" data-radiant-step="complete">
   <div data-radiant-wizard-body>
     <header data-radiant-wizard-header>
       <h2 data-radiant-heading="2">Setup Complete</h2>
@@ -707,8 +719,7 @@ async function validateGitHubToken(token: string): Promise<TokenValidationResult
       platform: "github",
       status: 401,
       code: "auth_failed",
-      message:
-        "GitHub token is invalid or has expired. Please check the token and try again.",
+      message: "GitHub token is invalid or has expired. Please check the token and try again.",
     });
   }
 
@@ -769,8 +780,7 @@ async function validateGitLabToken(
       platform: "gitlab",
       status: 401,
       code: "auth_failed",
-      message:
-        "GitLab token is invalid or has expired. Please check the token and try again.",
+      message: "GitLab token is invalid or has expired. Please check the token and try again.",
     });
   }
 

@@ -440,7 +440,9 @@ function renderPollIntervalForm(currentMinutes: number): string {
     <h2 data-radiant-heading="3">Poll Interval</h2>
     <p data-radiant-body>
       How often the monitor checks for new pull requests, CI runs, and alerts.
-      Current: <strong>${escHtml(String(currentMinutes))} minute${currentMinutes === 1 ? "" : "s"}</strong>.
+      Current: <strong>${escHtml(String(currentMinutes))} minute${
+    currentMinutes === 1 ? "" : "s"
+  }</strong>.
     </p>
     <form
       data-radiant-form

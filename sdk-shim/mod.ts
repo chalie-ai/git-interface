@@ -44,13 +44,7 @@ export * from "./types.ts";
 //  `sendError` — note: `sendMessage`, `sendSignal`, and `dataDir` are
 //  exported via `index.ts` below to keep a single canonical source)
 // ---------------------------------------------------------------------------
-export {
-  decodeMessage,
-  encodeResponse,
-  readRequest,
-  sendError,
-  writeResponse,
-} from "./ipc.ts";
+export { decodeMessage, encodeResponse, readRequest, sendError, writeResponse } from "./ipc.ts";
 
 // ---------------------------------------------------------------------------
 // High-level API façade

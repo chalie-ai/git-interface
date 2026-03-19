@@ -44,17 +44,13 @@
 import { registerCapability, secrets } from "@chalie/interface-sdk";
 import type { CapabilityContext, CapabilityResult } from "@chalie/interface-sdk";
 import { loadState, saveState } from "~/monitor/store.ts";
-import type {
-  GitHubPlatformState,
-  GitLabPlatformState,
-  MonitorState,
-} from "~/monitor/store.ts";
+import type { GitHubPlatformState, GitLabPlatformState, MonitorState } from "~/monitor/store.ts";
 import {
   createIssue as ghCreateIssue,
   createPR as ghCreatePR,
   createReview as ghCreateReview,
-  getRepo as ghGetRepo,
   getPR as ghGetPR,
+  getRepo as ghGetRepo,
   listBranches as ghListBranches,
   listIssues as ghListIssues,
   listPRs as ghListPRs,
@@ -412,9 +408,7 @@ async function handlePrList(ctx: CapabilityContext): Promise<CapabilityResult> {
           } else if (filter === "mine") {
             fetched = fetched.filter((pr) => pr.author === ghState.username);
           } else if (filter === "review_requested") {
-            fetched = fetched.filter((pr) =>
-              pr.reviewers.includes(ghState.username)
-            );
+            fetched = fetched.filter((pr) => pr.reviewers.includes(ghState.username));
           } else if (filter === "draft") {
             fetched = fetched.filter((pr) => pr.isDraft);
           }
@@ -454,9 +448,7 @@ async function handlePrList(ctx: CapabilityContext): Promise<CapabilityResult> {
           if (filter === "mine") {
             fetched = fetched.filter((pr) => pr.author === glState.username);
           } else if (filter === "review_requested") {
-            fetched = fetched.filter((pr) =>
-              pr.reviewers.includes(glState.username)
-            );
+            fetched = fetched.filter((pr) => pr.reviewers.includes(glState.username));
           } else if (filter === "draft") {
             fetched = fetched.filter((pr) => pr.isDraft);
           }
@@ -626,10 +618,9 @@ async function handlePrMerge(ctx: CapabilityContext): Promise<CapabilityResult> 
     if (platform === "github") {
       const { token } = await requireGitHub(state);
       const [owner, repo] = splitRepo(repoParam);
-      const mergeMethod =
-        method === "squash" || method === "rebase"
-          ? (method as "squash" | "rebase")
-          : "merge";
+      const mergeMethod = method === "squash" || method === "rebase"
+        ? (method as "squash" | "rebase")
+        : "merge";
       await ghMergePR(token, owner, repo, number, { mergeMethod });
       return { title: "Merged", text: `PR #${number} in ${repoParam} was merged successfully.` };
     }
@@ -714,8 +705,7 @@ async function handlePrReview(ctx: CapabilityContext): Promise<CapabilityResult>
     if (platform === "gitlab") {
       if (event === "approve" || event === "request_changes") {
         return {
-          error:
-            `GitLab does not support "${event}" reviews via the PAT API. ` +
+          error: `GitLab does not support "${event}" reviews via the PAT API. ` +
             `Only "comment" (MR notes) is supported. Use the GitLab web UI to approve.`,
         };
       }
@@ -1141,8 +1131,7 @@ async function handlePipelineTrigger(ctx: CapabilityContext): Promise<Capability
     if (platform === "github") {
       if (workflowId === undefined) {
         return {
-          error:
-            'Parameter "workflow_id" is required for GitHub. ' +
+          error: 'Parameter "workflow_id" is required for GitHub. ' +
             'Provide the workflow filename (e.g. "ci.yml").',
         };
       }
@@ -1151,8 +1140,7 @@ async function handlePipelineTrigger(ctx: CapabilityContext): Promise<Capability
       await ghTriggerWorkflow(token, owner, repo, workflowId, ref, inputs);
       return {
         title: "Workflow triggered",
-        text:
-          `Workflow "${workflowId}" dispatched on ${repoParam} @ ${ref}. ` +
+        text: `Workflow "${workflowId}" dispatched on ${repoParam} @ ${ref}. ` +
           `Check the Actions tab for progress.`,
       };
     }
@@ -1204,8 +1192,7 @@ async function handleSecurityAlerts(ctx: CapabilityContext): Promise<CapabilityR
 
   if (platform === "gitlab") {
     return {
-      error:
-        "Security alerts are only available for GitHub repositories. " +
+      error: "Security alerts are only available for GitHub repositories. " +
         "GitLab vulnerability scanning is not supported by this capability.",
     };
   }
@@ -1222,11 +1209,10 @@ async function handleSecurityAlerts(ctx: CapabilityContext): Promise<CapabilityR
     const validStates = ["open", "dismissed", "auto_dismissed", "fixed"] as const;
     type AlertStateParam = (typeof validStates)[number];
 
-    const stateParam: AlertStateParam =
-      alertState !== undefined &&
-      (validStates as readonly string[]).includes(alertState)
-        ? (alertState as AlertStateParam)
-        : "open";
+    const stateParam: AlertStateParam = alertState !== undefined &&
+        (validStates as readonly string[]).includes(alertState)
+      ? (alertState as AlertStateParam)
+      : "open";
 
     const alerts: SecurityAlert[] = await ghListSecurityAlerts(token, owner, repo, {
       state: stateParam,
@@ -1298,8 +1284,7 @@ async function handleSearch(ctx: CapabilityContext): Promise<CapabilityResult> {
           const glResults = await fanOut(
             projectsCapped,
             FAN_OUT_CONCURRENCY,
-            (fullName) =>
-              glSearchCode(token, encodeProjectPath(fullName), query),
+            (fullName) => glSearchCode(token, encodeProjectPath(fullName), query),
           );
           results.push(...glResults);
         }
@@ -1568,7 +1553,8 @@ export function registerAllCapabilities(): void {
           platform: {
             type: "string",
             enum: ["github", "gitlab"],
-            description: "Optional platform filter. When omitted, returns repos from both platforms.",
+            description:
+              "Optional platform filter. When omitted, returns repos from both platforms.",
           },
         },
       },
@@ -1612,20 +1598,17 @@ export function registerAllCapabilities(): void {
           platform: {
             type: "string",
             enum: ["github", "gitlab"],
-            description:
-              "Platform filter. Required when `repo` is specified; " +
+            description: "Platform filter. Required when `repo` is specified; " +
               "when omitted, both platforms are queried.",
           },
           repo: {
             type: "string",
-            description:
-              'Optional "owner/repo". When absent, fans out across all monitored repos.',
+            description: 'Optional "owner/repo". When absent, fans out across all monitored repos.',
           },
           filter: {
             type: "string",
             enum: ["open", "closed", "merged", "mine", "review_requested", "draft"],
-            description:
-              '"open" (default) | "closed" | "merged" | "mine" (authored by me) | ' +
+            description: '"open" (default) | "closed" | "merged" | "mine" (authored by me) | ' +
               '"review_requested" (I am a requested reviewer) | "draft" (open drafts).',
           },
         },
@@ -1715,8 +1698,7 @@ export function registerAllCapabilities(): void {
           method: {
             type: "string",
             enum: ["merge", "squash", "rebase"],
-            description:
-              'Merge method. Defaults to "merge". ' +
+            description: 'Merge method. Defaults to "merge". ' +
               'GitLab supports "merge" and "squash" only; "rebase" is treated as "merge".',
           },
         },
@@ -1730,8 +1712,7 @@ export function registerAllCapabilities(): void {
   registerCapability(
     "pr_review",
     {
-      description:
-        "Submit a code review on a pull/merge request. " +
+      description: "Submit a code review on a pull/merge request. " +
         'GitHub supports all events; GitLab supports "comment" only.',
       parameters: {
         type: "object",
@@ -1749,8 +1730,7 @@ export function registerAllCapabilities(): void {
           event: {
             type: "string",
             enum: ["approve", "request_changes", "comment"],
-            description:
-              '"approve" | "request_changes" | "comment". ' +
+            description: '"approve" | "request_changes" | "comment". ' +
               'GitLab supports "comment" only.',
           },
           body: {
@@ -1784,8 +1764,7 @@ export function registerAllCapabilities(): void {
           filter: {
             type: "string",
             enum: ["open", "closed", "mine", "assigned", "all"],
-            description:
-              '"open" (default) | "closed" | "mine" (authored by me) | ' +
+            description: '"open" (default) | "closed" | "mine" (authored by me) | ' +
               '"assigned" (assigned to me) | "all".',
           },
         },
@@ -1835,8 +1814,7 @@ export function registerAllCapabilities(): void {
   registerCapability(
     "issue_update",
     {
-      description:
-        "Update an existing issue. Only provided fields are modified. " +
+      description: "Update an existing issue. Only provided fields are modified. " +
         "Assignees are GitHub-only (GitLab uses numeric user IDs).",
       parameters: {
         type: "object",
@@ -1922,7 +1900,7 @@ export function registerAllCapabilities(): void {
           },
           status: {
             type: "string",
-            description: "Optional status to filter by (e.g. \"failed\", \"success\").",
+            description: 'Optional status to filter by (e.g. "failed", "success").',
           },
         },
         required: ["platform", "repo"],
@@ -1935,9 +1913,8 @@ export function registerAllCapabilities(): void {
   registerCapability(
     "pipeline_trigger",
     {
-      description:
-        "Trigger a new CI/CD pipeline run. " +
-        "GitHub requires `workflow_id` (the workflow filename, e.g. \"ci.yml\"). " +
+      description: "Trigger a new CI/CD pipeline run. " +
+        'GitHub requires `workflow_id` (the workflow filename, e.g. "ci.yml"). ' +
         "GitLab uses `triggerPipeline` on the specified ref.",
       parameters: {
         type: "object",
@@ -1958,7 +1935,7 @@ export function registerAllCapabilities(): void {
           workflow_id: {
             type: "string",
             description:
-              "Workflow filename (e.g. \"ci.yml\"). Required for GitHub; ignored for GitLab.",
+              'Workflow filename (e.g. "ci.yml"). Required for GitHub; ignored for GitLab.',
           },
           inputs: {
             type: "object",
@@ -1976,15 +1953,14 @@ export function registerAllCapabilities(): void {
   registerCapability(
     "security_alerts",
     {
-      description:
-        "List Dependabot security alerts for a repository. GitHub only.",
+      description: "List Dependabot security alerts for a repository. GitHub only.",
       parameters: {
         type: "object",
         properties: {
           platform: {
             type: "string",
             enum: ["github"],
-            description: "Must be \"github\". Security alerts are GitHub-only.",
+            description: 'Must be "github". Security alerts are GitHub-only.',
           },
           repo: {
             type: "string",
@@ -2006,8 +1982,7 @@ export function registerAllCapabilities(): void {
   registerCapability(
     "search",
     {
-      description:
-        "Search code across repositories. GitHub: global search. " +
+      description: "Search code across repositories. GitHub: global search. " +
         "GitLab: project-scoped (up to 10 monitored projects when `repo` is omitted).",
       parameters: {
         type: "object",
@@ -2036,8 +2011,7 @@ export function registerAllCapabilities(): void {
   registerCapability(
     "monitor_add",
     {
-      description:
-        "Add a repository to the background monitor. " +
+      description: "Add a repository to the background monitor. " +
         "Verifies accessibility before adding.",
       parameters: {
         type: "object",
@@ -2086,8 +2060,7 @@ export function registerAllCapabilities(): void {
   registerCapability(
     "monitor_status",
     {
-      description:
-        "Return a summary of the monitor configuration: connected platforms, " +
+      description: "Return a summary of the monitor configuration: connected platforms, " +
         "monitored repos, last poll times, and notification settings.",
       parameters: {
         type: "object",

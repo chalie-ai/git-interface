@@ -41,12 +41,7 @@
 
 import { sendMessage, sendSignal } from "../sdk-shim/ipc.ts";
 import type { Platform } from "../shared/types.ts";
-import type {
-  Issue,
-  Pipeline,
-  PullRequest,
-  SecurityAlert,
-} from "../shared/types.ts";
+import type { Issue, Pipeline, PullRequest, SecurityAlert } from "../shared/types.ts";
 import type { MonitorState } from "./store.ts";
 
 // ---------------------------------------------------------------------------
@@ -376,19 +371,18 @@ function handleIssueAssigned(event: IssueAssignedEvent): void {
  * consult `state.settings` to determine whether the notification type is
  * enabled and, for CI failures, whether the branch qualifies.
  *
- * The function is declared `async` to allow callers to `await` it and to
- * accommodate future handlers that may need to perform async lookups (e.g.
- * resolving a token reference to enrich the notification message).
+ * All current handlers are synchronous. The return type is `void` rather
+ * than `Promise<void>` because no async I/O is performed; callers that
+ * already `await` this function continue to work unchanged since `await`
+ * on a non-Promise value resolves immediately.
  *
  * @param input - Batch of classified events to process.
  * @param state - Current monitor state; the `settings` field controls which
  *   notification types are active and which CI branches trigger alerts.
- * @returns A promise that resolves when all events in the batch have been
- *   processed.
  *
  * @example
  * ```ts
- * await classifyAndNotify(
+ * classifyAndNotify(
  *   {
  *     events: [
  *       { type: "review_requested", pr, requester: "alice" },
@@ -399,10 +393,10 @@ function handleIssueAssigned(event: IssueAssignedEvent): void {
  * );
  * ```
  */
-export async function classifyAndNotify(
+export function classifyAndNotify(
   input: ClassifierInput,
   state: MonitorState,
-): Promise<void> {
+): void {
   const { settings } = state;
 
   for (const event of input.events) {

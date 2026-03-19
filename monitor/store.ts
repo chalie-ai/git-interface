@@ -300,28 +300,28 @@ export async function loadState(): Promise<MonitorState> {
   const state: MonitorState = {
     ...(parsed.github !== undefined
       ? {
-          github: {
-            ...parsed.github,
-            // "" sentinel = "first run". effectiveLastPollAt() in poller.ts
-            // calls lastPollAt.length > 0; null would throw TypeError.
-            lastPollAt: parsed.github.lastPollAt ?? "",
-            // Coerce array fields: .push()/.includes() on null throws TypeError.
-            seenEventIds: parsed.github.seenEventIds ?? [],
-            monitoredRepos: parsed.github.monitoredRepos ?? [],
-          },
-        }
+        github: {
+          ...parsed.github,
+          // "" sentinel = "first run". effectiveLastPollAt() in poller.ts
+          // calls lastPollAt.length > 0; null would throw TypeError.
+          lastPollAt: parsed.github.lastPollAt ?? "",
+          // Coerce array fields: .push()/.includes() on null throws TypeError.
+          seenEventIds: parsed.github.seenEventIds ?? [],
+          monitoredRepos: parsed.github.monitoredRepos ?? [],
+        },
+      }
       : {}),
     ...(parsed.gitlab !== undefined
       ? {
-          gitlab: {
-            ...parsed.gitlab,
-            // "" sentinel = "first run". Same guard as github.lastPollAt above.
-            lastPollAt: parsed.gitlab.lastPollAt ?? "",
-            // Coerce array fields: .push()/.includes() on null throws TypeError.
-            seenEventIds: parsed.gitlab.seenEventIds ?? [],
-            monitoredRepos: parsed.gitlab.monitoredRepos ?? [],
-          },
-        }
+        gitlab: {
+          ...parsed.gitlab,
+          // "" sentinel = "first run". Same guard as github.lastPollAt above.
+          lastPollAt: parsed.gitlab.lastPollAt ?? "",
+          // Coerce array fields: .push()/.includes() on null throws TypeError.
+          seenEventIds: parsed.gitlab.seenEventIds ?? [],
+          monitoredRepos: parsed.gitlab.monitoredRepos ?? [],
+        },
+      }
       : {}),
     settings: {
       ...defaultSettings(),

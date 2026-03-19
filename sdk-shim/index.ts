@@ -53,16 +53,9 @@ export { dataDir, sendMessage, sendSignal } from "./ipc.ts";
 // Internal imports for wrapping
 // ---------------------------------------------------------------------------
 
-import {
-  dispatch as _dispatch,
-  registerCapability as _registerCapability,
-} from "./registry.ts";
+import { dispatch as _dispatch, registerCapability as _registerCapability } from "./registry.ts";
 import { retrieveSecret, storeSecret } from "./secrets.ts";
-import type {
-  CapabilityHandler,
-  CapabilityResult,
-  CapabilitySchema,
-} from "./types.ts";
+import type { CapabilityHandler, CapabilityResult, CapabilitySchema } from "./types.ts";
 
 // ---------------------------------------------------------------------------
 // Capability registry façade
@@ -130,7 +123,7 @@ export function registerCapability(
  * console.log(result.text);
  * ```
  */
-export async function dispatch(
+export function dispatch(
   name: string,
   args: Record<string, unknown> = {},
 ): Promise<CapabilityResult> {

@@ -116,9 +116,7 @@ const _repoLastErrors = new Map<string, string>();
  * @returns ISO 8601 timestamp to use as the polling lower bound.
  */
 function effectiveLastPollAt(lastPollAt: string): string {
-  return lastPollAt.length > 0
-    ? lastPollAt
-    : new Date(Date.now() - 86_400_000).toISOString();
+  return lastPollAt.length > 0 ? lastPollAt : new Date(Date.now() - 86_400_000).toISOString();
 }
 
 /**
@@ -300,8 +298,14 @@ function eventsFromGitHubPR(
   if (pr.body !== undefined && containsMention(pr.body, username)) {
     if (claimEvent("github", `gh:mention:pr:${pr.id}`)) {
       events.push(
-        makeMentionEvent("github", pr.repo, pr.number, pr.author, pr.url,
-          mentionExcerpt(pr.body, username)),
+        makeMentionEvent(
+          "github",
+          pr.repo,
+          pr.number,
+          pr.author,
+          pr.url,
+          mentionExcerpt(pr.body, username),
+        ),
       );
     }
   }
@@ -336,8 +340,14 @@ function eventsFromGitHubIssue(
   if (issue.body !== undefined && containsMention(issue.body, username)) {
     if (claimEvent("github", `gh:mention:issue:${issue.id}`)) {
       events.push(
-        makeMentionEvent("github", issue.repo, issue.number, issue.author, issue.url,
-          mentionExcerpt(issue.body, username)),
+        makeMentionEvent(
+          "github",
+          issue.repo,
+          issue.number,
+          issue.author,
+          issue.url,
+          mentionExcerpt(issue.body, username),
+        ),
       );
     }
   }
@@ -429,8 +439,14 @@ function eventsFromGitLabMR(
   if (mr.body !== undefined && containsMention(mr.body, username)) {
     if (claimEvent("gitlab", `gl:mention:mr:${mr.id}`)) {
       events.push(
-        makeMentionEvent("gitlab", mr.repo, mr.number, mr.author, mr.url,
-          mentionExcerpt(mr.body, username)),
+        makeMentionEvent(
+          "gitlab",
+          mr.repo,
+          mr.number,
+          mr.author,
+          mr.url,
+          mentionExcerpt(mr.body, username),
+        ),
       );
     }
   }
@@ -465,8 +481,14 @@ function eventsFromGitLabIssue(
   if (issue.body !== undefined && containsMention(issue.body, username)) {
     if (claimEvent("gitlab", `gl:mention:issue:${issue.id}`)) {
       events.push(
-        makeMentionEvent("gitlab", issue.repo, issue.number, issue.author, issue.url,
-          mentionExcerpt(issue.body, username)),
+        makeMentionEvent(
+          "gitlab",
+          issue.repo,
+          issue.number,
+          issue.author,
+          issue.url,
+          mentionExcerpt(issue.body, username),
+        ),
       );
     }
   }
