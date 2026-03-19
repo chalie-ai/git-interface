@@ -5,6 +5,11 @@
  *
  * Resolution order for storage backends:
  * 1. Chalie secrets API (when `CHALIE_SECRETS_SOCKET` env var is set).
+ *    **⚠ NOT YET IMPLEMENTED** — the Chalie socket protocol has not been
+ *    defined by the core team. Both `storeSecret` and `retrieveSecret`
+ *    will throw a descriptive `Error` when this path is taken. Unset
+ *    `CHALIE_SECRETS_SOCKET` and set `CHALIE_ALLOW_PLAINTEXT_SECRETS=1`
+ *    to use the file fallback until the socket backend is ready.
  * 2. OS keyring via `DENO_KEYRING` env var pointing to a keyring helper.
  * 3. Encrypted file fallback in `dataDir()` — requires explicit user
  *    opt-in via `CHALIE_ALLOW_PLAINTEXT_SECRETS=1`. Plaintext JSON
@@ -62,15 +67,21 @@ function isPlaintextFallbackAllowed(): boolean {
  * @param key - Logical key for the secret (e.g. `"github_token"`).
  * @param value - Secret value to store (e.g. a personal access token).
  * @returns A `SecretRef` opaque reference string.
+ * @throws {Error} If `CHALIE_SECRETS_SOCKET` is set — the Chalie socket
+ *   backend is not yet implemented. Unset `CHALIE_SECRETS_SOCKET` and set
+ *   `CHALIE_ALLOW_PLAINTEXT_SECRETS=1` to use the file fallback instead.
  * @throws {Error} If no storage backend is available and plaintext
  *   fallback has not been opted into.
  */
 export async function storeSecret(key: string, value: string): Promise<SecretRef> {
   const chalieSocket = Deno.env.get("CHALIE_SECRETS_SOCKET");
   if (chalieSocket) {
-    // TODO: implement Chalie secrets API IPC call when socket protocol
-    // is defined by the core team.
-    return `chalie:${key}`;
+    throw new Error(
+      `The Chalie socket secrets backend (CHALIE_SECRETS_SOCKET=${chalieSocket}) is not yet ` +
+        `implemented — the socket protocol has not been defined by the core team. ` +
+        `To store secrets now, unset CHALIE_SECRETS_SOCKET and set ` +
+        `CHALIE_ALLOW_PLAINTEXT_SECRETS=1 to enable the file fallback backend.`,
+    );
   }
 
   if (isPlaintextFallbackAllowed()) {
@@ -91,21 +102,24 @@ export async function storeSecret(key: string, value: string): Promise<SecretRef
  *
  * @param ref - The `SecretRef` returned at store time.
  * @returns The secret value, or `undefined` if not found.
- * @throws {Error} If the backend indicated by `ref` is unavailable.
+ * @throws {Error} If `ref` has a `"chalie:"` prefix — the Chalie socket
+ *   backend is not yet implemented. To recover, unset `CHALIE_SECRETS_SOCKET`,
+ *   set `CHALIE_ALLOW_PLAINTEXT_SECRETS=1`, and re-run the setup wizard so
+ *   the token is re-stored under the file backend.
+ * @throws {Error} If the backend indicated by `ref` is otherwise unavailable.
  */
 export async function retrieveSecret(ref: SecretRef): Promise<string | undefined> {
   if (ref.startsWith("chalie:")) {
-    const key = ref.slice("chalie:".length);
     const chalieSocket = Deno.env.get("CHALIE_SECRETS_SOCKET");
-    if (!chalieSocket) {
-      throw new Error(
-        `Secret ref "${ref}" requires the Chalie secrets API, but ` +
-          `CHALIE_SECRETS_SOCKET is not set.`,
-      );
-    }
-    // TODO: implement Chalie secrets API retrieval.
-    void key;
-    return undefined;
+    throw new Error(
+      `The Chalie socket secrets backend is not yet implemented — the socket protocol has not ` +
+        `been defined by the core team.` +
+        (chalieSocket
+          ? ` (CHALIE_SECRETS_SOCKET is set to "${chalieSocket}")`
+          : ` (CHALIE_SECRETS_SOCKET is not set, so the ref "${ref}" cannot be resolved)`) +
+        `. To recover: unset CHALIE_SECRETS_SOCKET, set CHALIE_ALLOW_PLAINTEXT_SECRETS=1, ` +
+        `and re-run the setup wizard to re-store the token under the file backend.`,
+    );
   }
 
   if (ref.startsWith("file:")) {
