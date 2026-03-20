@@ -1203,7 +1203,7 @@ createDaemon({
 
       return {
         text: result.text ?? null,
-        html: result.html,
+        html: result.html ?? null,
         data: null,
       };
     } catch (err) {
