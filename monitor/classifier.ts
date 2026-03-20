@@ -39,7 +39,7 @@
  * ```
  */
 
-import { sendMessage, sendSignal } from "../sdk-shim/ipc.ts";
+import { sendMessage, sendSignal } from "jsr:@chalie/interface-sdk@^1.1.0";
 import type { Platform } from "../shared/types.ts";
 import type {
   Issue,
@@ -240,19 +240,16 @@ function handleCIFailure(
 
   const label = platformLabel(pipeline.platform);
 
-  sendSignal(
-    "ci_failure",
-    `[${label}] CI failed on "${pipeline.branch}" in ${pipeline.repo}: ${pipeline.name}. ${pipeline.url}`,
-    "high",
-    {
-      repo: pipeline.repo,
-      platform: pipeline.platform,
-      branch: pipeline.branch,
-      pipelineName: pipeline.name,
-      pipelineId: pipeline.id,
-      url: pipeline.url,
-    },
-  );
+  sendSignal("ci_failure", {
+    content: `[${label}] CI failed on "${pipeline.branch}" in ${pipeline.repo}: ${pipeline.name}. ${pipeline.url}`,
+    energy: "high",
+    repo: pipeline.repo,
+    platform: pipeline.platform,
+    branch: pipeline.branch,
+    pipelineName: pipeline.name,
+    pipelineId: pipeline.id,
+    url: pipeline.url,
+  });
 }
 
 /**
@@ -295,19 +292,16 @@ function handleMention(event: MentionEvent, notifyOn: boolean): void {
 
   const label = platformLabel(event.platform);
 
-  sendSignal(
-    "mention",
-    `[${label}] You were mentioned in ${event.repo}#${event.itemNumber} by ${event.author}. ${event.url}`,
-    "medium",
-    {
-      repo: event.repo,
-      platform: event.platform,
-      itemNumber: event.itemNumber,
-      author: event.author,
-      url: event.url,
-      ...(event.excerpt !== undefined ? { excerpt: event.excerpt } : {}),
-    },
-  );
+  sendSignal("mention", {
+    content: `[${label}] You were mentioned in ${event.repo}#${event.itemNumber} by ${event.author}. ${event.url}`,
+    energy: "medium",
+    repo: event.repo,
+    platform: event.platform,
+    itemNumber: event.itemNumber,
+    author: event.author,
+    url: event.url,
+    ...(event.excerpt !== undefined ? { excerpt: event.excerpt } : {}),
+  });
 }
 
 /**
@@ -323,18 +317,15 @@ function handlePRMerged(event: PRMergedEvent): void {
   const { pr } = event;
   const label = platformLabel(pr.platform);
 
-  sendSignal(
-    "pr_merged",
-    `[${label}] PR merged: "${pr.title}" in ${pr.repo} by ${pr.author}. ${pr.url}`,
-    "low",
-    {
-      repo: pr.repo,
-      platform: pr.platform,
-      prNumber: pr.number,
-      author: pr.author,
-      url: pr.url,
-    },
-  );
+  sendSignal("pr_merged", {
+    content: `[${label}] PR merged: "${pr.title}" in ${pr.repo} by ${pr.author}. ${pr.url}`,
+    energy: "low",
+    repo: pr.repo,
+    platform: pr.platform,
+    prNumber: pr.number,
+    author: pr.author,
+    url: pr.url,
+  });
 }
 
 /**
@@ -350,18 +341,15 @@ function handleIssueAssigned(event: IssueAssignedEvent): void {
   const { issue, assignee } = event;
   const label = platformLabel(issue.platform);
 
-  sendSignal(
-    "issue_assigned",
-    `[${label}] Issue assigned to ${assignee}: "${issue.title}" in ${issue.repo}. ${issue.url}`,
-    "medium",
-    {
-      repo: issue.repo,
-      platform: issue.platform,
-      issueNumber: issue.number,
-      assignee,
-      url: issue.url,
-    },
-  );
+  sendSignal("issue_assigned", {
+    content: `[${label}] Issue assigned to ${assignee}: "${issue.title}" in ${issue.repo}. ${issue.url}`,
+    energy: "medium",
+    repo: issue.repo,
+    platform: issue.platform,
+    issueNumber: issue.number,
+    assignee,
+    url: issue.url,
+  });
 }
 
 // ---------------------------------------------------------------------------

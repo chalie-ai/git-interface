@@ -1,12 +1,16 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@chalie/interface-sdk@^1.1.0": "1.1.0",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.17": "1.0.19",
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/testing@1": "1.0.17"
   },
   "jsr": {
+    "@chalie/interface-sdk@1.1.0": {
+      "integrity": "0f978455bc47986d7240f0fa04f122e0738a6c4b65912cc790cd2de6ce872121"
+    },
     "@std/assert@1.0.19": {
       "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
       "dependencies": [

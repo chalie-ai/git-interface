@@ -50,7 +50,15 @@
 
 import type { Platform, Repo } from "~/shared/mod.ts";
 import { ApiError } from "~/shared/mod.ts";
-import { secrets } from "@chalie/interface-sdk";
+// Secrets are now handled directly by daemon.ts — the setup wizard's
+// handleSetupAction is only used as a fallback by legacy code paths.
+// Token storage is done by the daemon's executeCommand("_setup_wizard", ...).
+// This import provides a no-op facade for backward compatibility with
+// code that references it (handleSaveToken, handleLoadRepos).
+const secrets = {
+  async get(_key: string): Promise<string | null> { return null; },
+  async set(_key: string, _val: string): Promise<void> {},
+};
 import { loadState, saveState } from "~/monitor/store.ts";
 import type { GitHubPlatformState, GitLabPlatformState } from "~/monitor/store.ts";
 import { listRepos } from "~/github/mod.ts";

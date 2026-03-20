@@ -34,7 +34,23 @@
  * ```
  */
 
-import { dataDir } from "../sdk-shim/ipc.ts";
+// ---------------------------------------------------------------------------
+// Data directory
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the writable data directory for persistent tool state.
+ *
+ * Resolution order:
+ * 1. `CHALIE_DATA_DIR` environment variable (set by daemon.ts at startup).
+ * 2. `~/.chalie/git-interface` fallback.
+ */
+function dataDir(): string {
+  const envDir = Deno.env.get("CHALIE_DATA_DIR");
+  if (envDir) return envDir;
+  const home = Deno.env.get("HOME") ?? ".";
+  return `${home}/.chalie/git-interface`;
+}
 import type { Platform } from "../shared/types.ts";
 
 // ---------------------------------------------------------------------------

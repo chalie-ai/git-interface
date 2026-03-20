@@ -27,4 +27,4 @@ export type {
   MonitorSettings,
   MonitorState,
 } from "./store.ts";
-export { startPoller } from "./poller.ts";
+export { setPollerSecrets, startPoller } from "./poller.ts";

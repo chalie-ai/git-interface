@@ -46,7 +46,16 @@ import type {
   SecurityAlertEvent,
 } from "../monitor/classifier.ts";
 import type { MonitorSettings, MonitorState } from "../monitor/store.ts";
-import type { OutboundResponse } from "../sdk-shim/types.ts";
+/**
+ * Wire-protocol response type (previously from sdk-shim/types.ts).
+ * Defined locally since the sdk-shim has been removed.
+ */
+interface OutboundResponse {
+  text?: string;
+  html?: string;
+  title?: string;
+  error?: string;
+}
 
 import {
   GH_ISSUE,

@@ -41,8 +41,92 @@
  * ```
  */
 
-import { registerCapability, secrets } from "@chalie/interface-sdk";
-import type { CapabilityContext, CapabilityResult } from "@chalie/interface-sdk";
+// ---------------------------------------------------------------------------
+// Local types (previously from sdk-shim/types.ts)
+// ---------------------------------------------------------------------------
+
+/** Invocation context passed to a capability handler. */
+interface CapabilityContext {
+  params: Record<string, unknown>;
+  invokedAt: string;
+}
+
+/** Result returned by a capability handler. */
+export interface CapabilityResult {
+  text?: string;
+  html?: string;
+  title?: string;
+  error?: string;
+}
+
+/** A capability handler function. */
+type CapabilityHandler = (
+  ctx: CapabilityContext,
+) => CapabilityResult | Promise<CapabilityResult>;
+
+// ---------------------------------------------------------------------------
+// Local capability registry
+// ---------------------------------------------------------------------------
+
+const _handlers = new Map<string, CapabilityHandler>();
+
+function registerCapability(
+  name: string,
+  _schema: { description: string; parameters: unknown },
+  handler: CapabilityHandler,
+): void {
+  _handlers.set(name, handler);
+}
+
+/**
+ * Dispatches a capability call by name.
+ * Used by daemon.ts to route calls to the existing handlers.
+ */
+export async function dispatch(
+  name: string,
+  args: Record<string, unknown> = {},
+): Promise<CapabilityResult> {
+  const handler = _handlers.get(name);
+  if (!handler) {
+    return {
+      error: `Unknown capability: "${name}". Available: ${[..._handlers.keys()].join(", ")}`,
+    };
+  }
+  const ctx: CapabilityContext = {
+    params: args,
+    invokedAt: new Date().toISOString(),
+  };
+  return await handler(ctx);
+}
+
+// ---------------------------------------------------------------------------
+// Secrets accessor (lazy import from daemon module)
+// ---------------------------------------------------------------------------
+
+import type { Secrets } from "../src/secrets.ts";
+
+/** Module-level secrets reference, set during registerAllCapabilities(). */
+let _secrets: Secrets | null = null;
+
+/**
+ * Sets the secrets store. Must be called before any capability that
+ * needs token access is invoked.
+ */
+export function setSecrets(s: Secrets): void {
+  _secrets = s;
+}
+
+/** Secrets facade matching the old sdk-shim API. */
+const secrets = {
+  async get(key: string): Promise<string | null> {
+    if (!_secrets) return null;
+    return await _secrets.get(key);
+  },
+  async set(key: string, val: string): Promise<void> {
+    if (!_secrets) throw new Error("Secrets store not initialised");
+    await _secrets.set(key, val);
+  },
+};
 import { loadState, saveState } from "~/monitor/store.ts";
 import type {
   GitHubPlatformState,

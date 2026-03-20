@@ -54,8 +54,32 @@
 
 import { ApiError } from "../shared/types.ts";
 import type { Issue, Pipeline, PullRequest, SecurityAlert } from "../shared/types.ts";
-import { retrieveSecret } from "../sdk-shim/secrets.ts";
-import { sendMessage } from "../sdk-shim/ipc.ts";
+import { sendMessage } from "jsr:@chalie/interface-sdk@^1.1.0";
+import type { Secrets } from "../src/secrets.ts";
+
+// ---------------------------------------------------------------------------
+// Secrets accessor (injected by daemon.ts via setPollerSecrets)
+// ---------------------------------------------------------------------------
+
+let _secrets: Secrets | null = null;
+
+/**
+ * Sets the secrets store for the poller. Must be called before the poller
+ * starts so it can retrieve platform tokens.
+ */
+export function setPollerSecrets(s: Secrets): void {
+  _secrets = s;
+}
+
+/**
+ * Retrieves a secret by its ref key. Returns `undefined` if the secrets
+ * store is not initialised or the key is not found.
+ */
+async function retrieveSecret(ref: string): Promise<string | undefined> {
+  if (!_secrets) return undefined;
+  const val = await _secrets.get(ref);
+  return val ?? undefined;
+}
 import {
   listIssues as ghListIssues,
   listPRs as ghListPRs,
