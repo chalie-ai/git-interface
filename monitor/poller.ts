@@ -54,7 +54,7 @@
 
 import { ApiError } from "../shared/types.ts";
 import type { Issue, Pipeline, PullRequest, SecurityAlert } from "../shared/types.ts";
-import { sendMessage } from "jsr:@chalie/interface-sdk@^1.1.0";
+import { sendMessage } from "../../_sdk/mod.ts";
 import type { Secrets } from "../src/secrets.ts";
 
 // ---------------------------------------------------------------------------

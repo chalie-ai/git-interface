@@ -32,7 +32,7 @@ import {
   createDaemon,
   sendMessage,
   sendSignal,
-} from "jsr:@chalie/interface-sdk@^1.1.0";
+} from "../_sdk/mod.ts";
 
 import { createSecrets } from "./src/secrets.ts";
 import type { Secrets } from "./src/secrets.ts";

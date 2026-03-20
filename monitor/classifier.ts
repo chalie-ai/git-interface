@@ -39,7 +39,7 @@
  * ```
  */
 
-import { sendMessage, sendSignal } from "jsr:@chalie/interface-sdk@^1.1.0";
+import { sendMessage, sendSignal } from "../../_sdk/mod.ts";
 import type { Platform } from "../shared/types.ts";
 import type {
   Issue,
